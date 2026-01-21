@@ -1,0 +1,70 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Anıl Market{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Custom Style -->
+  <link href="{% static 'css/main.css' %}" rel="stylesheet">
+
+  <style>
+    {
+      % block style %
+    }
+
+      {
+      % endblock style %
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="main-nav">
+    <div class="logo">
+      <a href="{% url 'dashboard' %}" style="text-decoration: none; color: inherit;">ANIL MARKET</a>
+    </div>
+
+    <ul>
+      <li><a href="{% url 'products:list' %}">Explore</a></li>
+      <li><a href="{% url 'tags:list' %}">Tags</a></li>
+      <li><a href="{% url 'library' %}">My Library</a></li>
+      {% if request.user.is_authenticated %}
+      <li><a href="{% url 'admin:index' %}" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Admin</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <main class="main-content animate-fade-in">
+    {% block content %}
+    {% endblock content %}
+  </main>
+
+  <footer
+    style="margin-top: 5rem; padding: 3rem; text-align: center; border-top: 1px solid var(--glass-border); color: var(--text-secondary);">
+    <p>&copy; 2026 Anıl Market. Built with Django & ✨</p>
+  </footer>
+
+  <!-- jQuery and Plugins -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="{% static 'js/django.csrf.js' %}"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      {% block jquery %}
+      {% endblock jquery %}
+    })
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object.title }} | Digital Arcade{% endblock %}
+
+{% block style %}
+.detail-container {
+display: grid;
+grid-template-columns: 1fr 400px;
+gap: 3rem;
+margin-top: 2rem;
+}
+
+@media (max-width: 900px) {
+.detail-container {
+grid-template-columns: 1fr;
+}
+}
+
+.product-hero-image {
+width: 100%;
+aspect-ratio: 16/9;
+background: var(--glass-bg);
+border-radius: 24px;
+border: 1px solid var(--glass-border);
+overflow: hidden;
+position: relative;
+}
+
+.product-hero-image img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.sidebar-card {
+position: sticky;
+top: 6rem;
+padding: 2rem;
+display: flex;
+flex-direction: column;
+gap: 1.5rem;
+}
+
+.price-tag {
+font-size: 2rem;
+font-weight: 800;
+color: var(--accent-color);
+}
+
+.rating-stars {
+display: flex;
+flex-direction: row-reverse;
+justify-content: flex-end;
+gap: 0.25rem;
+}
+
+.rating-stars input {
+display: none;
+}
+
+.rating-stars label {
+font-size: 1.5rem;
+color: var(--text-secondary);
+cursor: pointer;
+transition: var(--transition);
+}
+
+.rating-stars label:before {
+content: '★';
+}
+
+.rating-stars input:checked ~ label,
+.rating-stars label:hover,
+.rating-stars label:hover ~ label {
+color: #fbbf24;
+}
+
+.tag-badge {
+display: inline-block;
+padding: 0.25rem 0.75rem;
+background: var(--glass-bg);
+border: 1px solid var(--glass-border);
+border-radius: 20px;
+font-size: 0.8rem;
+color: var(--text-secondary);
+text-decoration: none;
+transition: var(--transition);
+}
+
+.tag-badge:hover {
+border-color: var(--accent-color);
+color: var(--accent-color);
+}
+{% endblock style %}
+
+{% block content %}
+<div class="detail-container">
+	<div class="detail-main">
+		<div class="product-hero-image">
+			{% with object.thumbnail_set.first as thumb %}
+			{% if thumb %}
+			<img src="{{ thumb.media.url }}" />
+			{% else %}
+			<div
+				style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+				<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"
+					stroke-linecap="round" stroke-linejoin="round">
+					<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+					<circle cx="8.5" cy="8.5" r="1.5"></circle>
+					<polyline points="21 15 16 10 5 21"></polyline>
+				</svg>
+			</div>
+			{% endif %}
+			{% endwith %}
+		</div>
+
+		<div style="margin-top: 2rem;">
+			<h1 style="margin-bottom: 0.5rem;">{{ object.title }}</h1>
+			<p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 2rem;">
+				by <a href="{{ object.seller.get_absolute_url }}"
+					style="color: var(--accent-color); text-decoration: none;">{{ object.seller.user.username }}</a>
+			</p>
+
+			<div class="glass" style="padding: 2rem; margin-bottom: 2rem;">
+				<h3 style="margin-bottom: 1rem;">Description</h3>
+				<p style="color: var(--text-secondary); white-space: pre-wrap;">{{ object.description }}</p>
+			</div>
+
+			<div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+				{% for tag in object.tag_set.all %}
+				<a href="{{ tag.get_absolute_url }}" class="tag-badge">{{ tag.title }}</a>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	<div class="detail-sidebar">
+		<div class="glass sidebar-card">
+			<div class="price-tag">
+				{{ object.get_html_price|safe }}
+			</div>
+
+			<div style="display: flex; flex-direction: column; gap: 1rem;">
+				{% if request.user.is_authenticated and object in request.user.myproducts.products.all %}
+				<a href="{{ object.get_download }}" class="btn btn-primary">Download Files</a>
+				<a href="{{ object.get_download }}?preview=True" class="btn btn-secondary">Preview Content</a>
+				{% else %}
+				<button id="purchase-btn" class="btn btn-primary">
+					{% if object.media %}Purchase Now{% else %}Pre-Order{% endif %}
+				</button>
+				<p style="font-size: 0.8rem; color: var(--text-secondary); text-align: center;">Safe & Secure
+					Transaction</p>
+				{% endif %}
+			</div>
+
+			<hr style="border: none; border-top: 1px solid var(--glass-border);">
+
+			<div>
+				<h4 style="margin-bottom: 1rem;">Community Rating</h4>
+				<div class="rating-stars">
+					<input type="radio" id="star5" name="rating" value="5" /><label for="star5"></label>
+					<input type="radio" id="star4" name="rating" value="4" /><label for="star4"></label>
+					<input type="radio" id="star3" name="rating" value="3" /><label for="star3"></label>
+					<input type="radio" id="star2" name="rating" value="2" /><label for="star2"></label>
+					<input type="radio" id="star1" name="rating" value="1" /><label for="star1"></label>
+				</div>
+				<p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem;">
+					{{ rating_avg.rating__avg|default:"0" }} avg from {{ rating_avg.rating__count }} reviews
+				</p>
+			</div>
+
+			<div style="font-size: 0.9rem; color: var(--text-secondary);">
+				<p>Purchases: {{ object.transaction_set.count }}</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="dialog-confirm" class="glass animate-fade-in"
+	style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; padding: 2rem; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+	<h2 style="margin-bottom: 1rem;">Confirm Purchase</h2>
+	<p style="margin-bottom: 2rem; color: var(--text-secondary);">You are about to purchase <strong>{{ object.title
+			}}</strong>. Your saved payment method will be charged.</p>
+	<div style="display: flex; gap: 1rem;">
+		<button id="confirm-buy" class="btn btn-primary" style="flex: 1;">Confirm</button>
+		<button id="cancel-buy" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+	</div>
+</div>
+
+{% endblock content %}
+
+{% block jquery %}
+$(".rating-stars input[value='{{ my_rating }}']").prop("checked", true);
+
+$(".rating-stars input").change(function(){
+var val = $(this).val();
+$.ajax({
+method: "POST",
+url: "{% url 'products:ajax_rating' %}",
+data: {
+product_id: "{{ object.id }}",
+rating_value: val
+},
+success: function(data) {
+console.log("Rated " + val);
+},
+error: function(xhr) {
+if (xhr.status == 401) alert("Please login to rate.");
+}
+});
+});
+
+$("#purchase-btn").click(function(e) {
+e.preventDefault();
+$("#dialog-confirm").fadeIn();
+});
+
+$("#cancel-buy").click(function() {
+$("#dialog-confirm").fadeOut();
+});
+
+$("#confirm-buy").click(function() {
+var btn = $(this);
+btn.prop('disabled', true).text('Processing...');
+
+$.ajax({
+method: "POST",
+url: "{% url 'checkout' %}",
+data: {
+product_id: "{{ object.id }}"
+},
+success: function(data) {
+location.reload();
+},
+error: function(xhr) {
+alert("Error processing transaction.");
+btn.prop('disabled', false).text('Confirm');
+}
+});
+});
+{% endblock jquery %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="margin-bottom: 4rem; text-align: center; padding: 4rem 2rem;" class="glass animate-fade-in">
+  <h1 style="font-size: 3.5rem; margin-bottom: 1rem;">Anıl Market'e Hoşgeldiniz</h1>
+  <p style="color: var(--text-secondary); font-size: 1.25rem; max-width: 600px; margin: 0 auto 2rem;">En kaliteli
+    dijital içerikleri ve yazılımları keşfedin.</p>
+  <a href="{% url 'products:list' %}" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">Start
+    Exploring</a>
+</div>
+
+<div style="margin-bottom: 4rem;">
+  <h2 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
+    <span
+      style="width: 12px; height: 12px; background: var(--accent-color); border-radius: 50%; box-shadow: 0 0 10px var(--accent-color);"></span>
+    Suggested for You
+  </h2>
+  {% include "products/product_list_snippet.html" with product_list=products %}
+</div>
+
+{% if top_tags %}
+<div style="margin-bottom: 4rem;">
+  <h2 style="margin-bottom: 1.5rem;">Popular Categories</h2>
+  <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+    {% for tag in top_tags %}
+    <a href="{{ tag.get_absolute_url }}" class="tag-badge" style="padding: 0.5rem 1.5rem; font-size: 1rem;">{{ tag
+      }}</a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if curated.count > 0 %}
+{% for curated_section in curated %}
+<div style="margin-bottom: 4rem;">
+  <h2 style="margin-bottom: 2rem;">{{ curated_section.section_name }}</h2>
+  {% include "products/product_list_snippet.html" with product_list=curated_section.products.all %}
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock content %}

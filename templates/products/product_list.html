@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block style %}
+
+{% endblock style %}
+{% block content %}
+<h1>{% if vendor_name %}{{ vendor_name }}{% endif %} Products</h1>
+<div style="margin-bottom: 2rem;">
+  <form method="GET" action="" style="display: flex; gap: 1rem; max-width: 500px;">
+    <input type='text' name='q' placeholder='Search products...' value='{{ request.GET.q }}'
+      style="margin-bottom: 0;" />
+    <input type='submit' value='Search' class="btn btn-primary" style="width: auto;" />
+  </form>
+</div>
+
+{% include "products/product_list_snippet.html" with product_list=object_list %}
+
+{% endblock %}
